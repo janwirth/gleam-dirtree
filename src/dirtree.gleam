@@ -149,10 +149,10 @@ fn from_paths_acc(
 /// //       ├─ README.md
 /// //       └─ old-README.md
 /// ```
-pub fn from_paths(
+pub fn from_terminals(
   dirpath: String,
   paths: List(String),
-) ->  DirTree {
+) -> DirTree {
   assert list.all(
     paths,
     fn(p) { !string.starts_with(p, "/") },
@@ -177,7 +177,7 @@ pub fn from_paths(
 /// Example.
 /// 
 /// ```gleam
-/// let tree = dt.from_paths(
+/// let tree = dt.from_terminals(
 ///   "../examples",
 ///   [
 ///     "futuristic/pngs/png1.png",
@@ -370,6 +370,19 @@ pub fn collapse(
   tree |> map(m)
 }
 
+/// Expands compound filepaths and dirpaths into
+/// nested sequences of atomic directories.
+/// 
+/// Example.
+/// 
+/// ```gleam
+/// Dirpath("a/b/c", [Filepath("z")])
+/// |> expand
+/// 
+/// // ->
+/// //
+/// // Dirpath("a", [Dirpath("b", [Dirpath("c", [Filepath("z")])])])
+/// ```
 pub fn expand(
   tree: DirTree,
 ) -> DirTree {
@@ -537,7 +550,7 @@ fn blocks_4_indentation(
 /// Example.
 /// 
 /// ```gleam
-/// let tree = dt.from_paths(
+/// let tree = dt.from_terminals(
 ///   "/",
 ///   [
 ///     "futuristic/pngs/png1.png",

@@ -10,7 +10,7 @@ pub fn main() -> Nil {
 }
 
 pub fn filter_test() {
-  dt.from_paths(
+  dt.from_terminals(
     "/",
     [
       "a/b/c/d/e/f/logo2.png",
@@ -20,7 +20,7 @@ pub fn filter_test() {
   |> dt.filter_and_prune(fn(path) { !string.ends_with(path.name, ".png")} )
   |> should.equal(Error(Nil))
 
-  dt.from_paths(
+  dt.from_terminals(
     "/",
     [
       "a/b/c/d/e/f/logo2.png",
@@ -32,7 +32,7 @@ pub fn filter_test() {
     Ok(Dirpath("/", [Dirpath("a", [Dirpath("b", [Dirpath("c", [Dirpath("d", [Dirpath("e", [Dirpath("f", [])])])])])])]))
   )
 
-  dt.from_paths(
+  dt.from_terminals(
     "/",
     [
       "a/b/c/d/e/f/logo2.png",
@@ -44,7 +44,7 @@ pub fn filter_test() {
     Ok(Dirpath("/", [Dirpath("a", [Dirpath("b", [Dirpath("c", [Dirpath("d", [Dirpath("e", [Dirpath("f", [])]), Filepath("logo1.png")])])])])]))
   )
 
-  dt.from_paths(
+  dt.from_terminals(
     "/",
     [
       "a/b/c/d/e/f/logo2.png",
@@ -56,7 +56,7 @@ pub fn filter_test() {
     Ok(Dirpath("/", [Dirpath("a", [Dirpath("b", [Dirpath("c", [Dirpath("d", [Filepath("logo1.png")])])])])]))
   )
 
-  dt.from_paths(
+  dt.from_terminals(
     "/",
     [
       "a/b/c/d/e/f/logo2.png",
@@ -71,7 +71,7 @@ pub fn filter_test() {
 }
 
 pub fn collapse_expand_test() {
-  dt.from_paths(
+  dt.from_terminals(
     "/",
     [
       "a/b/c/d/e/f/logo2.png",
@@ -82,7 +82,7 @@ pub fn collapse_expand_test() {
     Dirpath("/", [Dirpath("a", [Dirpath("b", [Dirpath("c", [Dirpath("d", [Dirpath("e", [Dirpath("f", [Filepath("logo2.png")])]), Filepath("logo1.png")])])])])])
   )
 
-  dt.from_paths(
+  dt.from_terminals(
     "/",
     [
       "a/b/c/d/e/f/logo2.png",
@@ -94,7 +94,7 @@ pub fn collapse_expand_test() {
     Dirpath("/a/b/c/d", [Filepath("e/f/logo2.png"), Filepath("logo1.png")])
   )
 
-  dt.from_paths(
+  dt.from_terminals(
     "/",
     [
       "a/b/c/d/e/f/logo2.png",
@@ -107,7 +107,7 @@ pub fn collapse_expand_test() {
     Dirpath("/", [Dirpath("a", [Dirpath("b", [Dirpath("c", [Dirpath("d", [Dirpath("e", [Dirpath("f", [Filepath("logo2.png")])]), Filepath("logo1.png")])])])])])
   )
 
-  dt.from_paths(
+  dt.from_terminals(
     "../examples",
     [
       "a/b/c/d/e/f/logo2.png",
@@ -122,7 +122,7 @@ pub fn collapse_expand_test() {
 }
 
 pub fn files_test() {
-  dt.from_paths(
+  dt.from_terminals(
     "/",
     [
       "a/b/c/d/e/f/logo2.png",
@@ -135,7 +135,7 @@ pub fn files_test() {
     "/a/b/c/d/logo1.png",
   ])
 
-  dt.from_paths(
+  dt.from_terminals(
     "../examples/",
     [
       "a/b/c/d/e/f/logo2.png",
@@ -148,7 +148,7 @@ pub fn files_test() {
     "../examples/a/b/c/d/logo1.png",
   ])
   
-  dt.from_paths(
+  dt.from_terminals(
     "../examples",
     [
       "futuristic/pngs/png1.png",
@@ -174,7 +174,7 @@ pub fn files_test() {
     "../examples/notes/rEADME.md",
   ])
 
-  dt.from_paths(
+  dt.from_terminals(
     "../examples/",
     [
       "futuristic/pngs/png1.png",
@@ -200,7 +200,7 @@ pub fn files_test() {
     "../examples/notes/rEADME.md",
   ])
 
-  dt.from_paths(
+  dt.from_terminals(
     "/",
     [
       "futuristic/pngs/png1.png",
@@ -226,14 +226,14 @@ pub fn files_test() {
     "/notes/rEADME.md",
   ])
 
-  dt.from_paths(
+  dt.from_terminals(
     "/",
     []
   )
   |> dt.files
   |> should.equal([])
 
-  dt.from_paths(
+  dt.from_terminals(
     "../examples",
     []
   )
@@ -242,7 +242,7 @@ pub fn files_test() {
 }
 
 pub fn terminals_test() {
-  dt.from_paths(
+  dt.from_terminals(
     "/",
     [
       "a/b/c/d/e/f/logo2.png",
@@ -257,7 +257,7 @@ pub fn terminals_test() {
     "/empty/",
   ])
 
-  dt.from_paths(
+  dt.from_terminals(
     "../examples/",
     [
       "a/b/c/d/e/f/logo2.png",
@@ -270,7 +270,7 @@ pub fn terminals_test() {
     "../examples/a/b/c/d/logo1.png",
   ])
   
-  dt.from_paths(
+  dt.from_terminals(
     "../examples",
     [
       "futuristic/pngs/png1.png",
@@ -297,7 +297,7 @@ pub fn terminals_test() {
     "../examples/notes/rEADME.md",
   ])
 
-  dt.from_paths(
+  dt.from_terminals(
     "../examples",
     []
   )
@@ -306,7 +306,7 @@ pub fn terminals_test() {
     "../examples/",
   ])
 
-  dt.from_paths(
+  dt.from_terminals(
     "/",
     [
       "futuristic/pngs/png1.png",
@@ -333,7 +333,7 @@ pub fn terminals_test() {
     "/notes/rEADME.md",
   ])
 
-  dt.from_paths(
+  dt.from_terminals(
     "/",
     []
   )
@@ -344,7 +344,7 @@ pub fn terminals_test() {
 }
 
 pub fn from_paths_test() {
-  dt.from_paths(
+  dt.from_terminals(
     "../examples",
     [
       "futuristic/pngs/png1.png",
@@ -398,7 +398,7 @@ pub fn from_paths_test() {
     ),
   )
   
-  dt.from_paths(
+  dt.from_terminals(
     "/",
     [
       "futuristic/pngs/png1.png",
@@ -463,7 +463,7 @@ pub fn sort_test() {
     }
   }
 
-  dt.from_paths(
+  dt.from_terminals(
     "../examples",
     [
       "futuristic/pngs/png1.png",
