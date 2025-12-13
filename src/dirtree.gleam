@@ -13,7 +13,7 @@ import gleam/string
 /// dirpath, as a relative path from the current working
 /// directory, may be empty.
 /// 
-/// *Examples*
+/// **Examples**
 /// 
 /// - `Filepath("examples/pngs/logo.png")`
 /// - `Dirpath("../src", [])`
@@ -101,20 +101,19 @@ fn from_terminals_acc(
   }
 }
 
-/// A function that constructs a DirTree from a path to a
+/// A function that constructs a `DirTree` from a path to a
 /// directory, forming the dirpath,  and a  of relative paths
-/// from within that directory. Paths that end in `/` are
-/// interpreted as empty directories.
+/// from within that directory to either files or empty directories,
+/// i.e., to the "terminal elements" of the directory tree. Terminals
+/// that end in `/` are interpreted as empty directories.
 /// 
 /// File paths may be out of order. 
 /// 
 /// Intermediate directories contained within the file paths
-/// should be listed separately, lest they be confused with
+/// should NOT be listed separately, lest they be confused with
 /// files!
 /// 
-/// Intermediate 
-/// 
-/// *Examples*
+/// **Examples**
 /// 
 /// ```gleam
 /// let tree = dirtree.from_paths(
@@ -151,15 +150,15 @@ fn from_terminals_acc(
 /// ```
 pub fn from_terminals(
   dirpath: String,
-  paths: List(String),
+  terminals: List(String),
 ) -> DirTree {
   assert list.all(
-    paths,
+    terminals,
     fn(p) { !string.starts_with(p, "/") },
   )
 
-  let paths =
-    paths
+  let terminals =
+    terminals
     |> list.sort(string.compare)
     |> list.map(string.split(_, "/"))
 
@@ -168,13 +167,13 @@ pub fn from_terminals(
     False -> dirpath
   }
 
-  Dirpath(dirpath, from_terminals_acc([], None, paths))
+  Dirpath(dirpath, from_terminals_acc([], None, terminals))
 }
 
-/// Sorts a DirTree recursively from a given order
+/// Sorts a `DirTree` recursively from a given order
 /// function.
 /// 
-/// *Examples*
+/// **Examples**
 /// 
 /// ```gleam
 /// let tree = dt.from_terminals(
@@ -241,7 +240,7 @@ pub fn sort(
   }
 }
 
-/// Recursively map a DirTree using a 1-to-1 transform. Maps children before parents (depth-first).
+/// Recursively map a `DirTree` using a 1-to-1 transform. Maps children before parents.
 pub fn map(
   tree: DirTree,
   m: fn(DirTree) -> DirTree,
@@ -255,7 +254,8 @@ pub fn map(
   }
 }
 
-/// Recursively map a DirTree using a 1-to-many transform. Maps children before parents (depth-first).
+/// Recursively map a `DirTree` using a 1-to-many transform.
+/// Maps children before parents.
 pub fn flat_map(
   tree: DirTree,
   m: fn(DirTree) -> List(DirTree),
@@ -269,7 +269,7 @@ pub fn flat_map(
   }
 }
 
-/// Recursively filters a DirTree using a boolean condition
+/// Recursively filters a `DirTree` using a boolean condition
 /// applied in depth-first fashion,
 ///
 /// Returns an `Error(Nil)` if the root of the tree is filtered
@@ -312,7 +312,7 @@ pub fn prune(
   }
 }
 
-/// Recursively filters a DirTree using a boolean condition
+/// Recursively filters a `DirTree` using a boolean condition
 /// applied in depth-first fashion while removing empty directories
 /// as well.
 ///
@@ -341,7 +341,7 @@ pub fn filter_and_prune(
 /// Concatenates names of directories containing a single child
 /// with that of their child.
 /// 
-/// *Examples*
+/// **Examples**
 /// 
 /// ```gleam
 /// Dirpath("a", [Dirpath("b", [Filepath("foo.png")])])
@@ -373,7 +373,7 @@ pub fn collapse(
 /// Expands compound filepaths and dirpaths into
 /// nested sequences of atomic directories.
 /// 
-/// *Examples*
+/// **Examples**
 /// 
 /// ```gleam
 /// Dirpath("a/b/c", [Filepath("z")])
@@ -431,7 +431,7 @@ pub fn files(
   }
 }
 
-/// Returns a list of paths to terminal elements of a DirTree,
+/// Returns a list of paths to terminal elements of a `DirTree`,
 /// these being either files or empty directories.
 /// 
 /// Empty directories are encoded by strings terminated with a `/`.
@@ -527,7 +527,7 @@ const default_pretty_printer_margin_blocks = PrettyPrinterMarginBlocks(
   s: "   ",
 )
 
-/// Pretty-print a DirTree. The result is given as a List(String)
+/// Pretty-print a `DirTree`. The result is given as a List(String)
 /// to allow a possible consumer to more easily add extra margin or
 /// embed the DirTree in a larger ASCII graphic.
 pub fn pretty_print(tree: DirTree) -> List(String) {
@@ -545,9 +545,9 @@ fn blocks_4_indentation(
   )
 }
 
-/// Pretty-print a DirTree at a custom level of indentation.
+/// Pretty-print a `DirTree` at a custom level of indentation.
 /// 
-/// *Examples*
+/// **Examples**
 /// 
 /// ```gleam
 /// let tree = dt.from_terminals(
