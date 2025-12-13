@@ -129,7 +129,7 @@ fn from_terminals_acc(
 /// )
 /// 
 /// tree
-/// |> dt.pretty_print
+/// |> dt.pretty_print(1)
 /// |> string.join("\n")
 /// |> io.println
 /// 
@@ -203,7 +203,7 @@ pub fn from_terminals(
 ///
 /// tree
 /// |> dt.sort(my_sort)
-/// |> dt.pretty_print
+/// |> dt.pretty_print(1)
 /// |> string.join("\n")
 /// |> io.println
 /// 
@@ -520,20 +520,6 @@ fn pretty_print_internal(
   }
 }
 
-const default_pretty_printer_margin_blocks = PrettyPrinterMarginBlocks(
-  t: "├─ ",
-  v: "│  ",
-  l: "└─ ",
-  s: "   ",
-)
-
-/// Pretty-print a `DirTree`. The result is given as a List(String)
-/// to allow a possible consumer to more easily add extra margin or
-/// embed the DirTree in a larger ASCII graphic.
-pub fn pretty_print(tree: DirTree) -> List(String) {
-  pretty_print_internal(tree, default_pretty_printer_margin_blocks)
-}
-
 fn blocks_4_indentation(
   indentation: Int,
 ) -> PrettyPrinterMarginBlocks {
@@ -545,7 +531,10 @@ fn blocks_4_indentation(
   )
 }
 
-/// Pretty-print a `DirTree` at a custom level of indentation.
+/// Pretty-print a `DirTree` using a given level of indentation.
+/// The result is given as a List(String) to allow a possible 
+/// consumer to more easily add extra margin or embed the tree 
+/// in a larger ASCII graphic.
 /// 
 /// **Examples**
 /// 
@@ -565,7 +554,7 @@ fn blocks_4_indentation(
 ///
 /// tree
 /// |> dt.sort(my_sort)
-/// |> dt.pretty_print_at_indentation(10)
+/// |> dt.pretty_print(10)
 /// |> string.join("\n")
 /// |> io.println
 /// 
@@ -584,6 +573,6 @@ fn blocks_4_indentation(
 /// //             ├────────── README.md
 /// //             └────────── old-README.md
 /// ```
-pub fn pretty_print_at_indentation(tree: DirTree, indentation: Int) -> List(String) {
+pub fn pretty_print(tree: DirTree, indentation: Int) -> List(String) {
   pretty_print_internal(tree, blocks_4_indentation(indentation))
 }
