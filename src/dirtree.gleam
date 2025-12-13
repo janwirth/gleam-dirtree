@@ -24,14 +24,14 @@ pub type DirTree {
   Dirpath(name: String, contents: List(DirTree))
 }
 
-fn from_paths_acc(
+fn from_terminals_acc(
   previous: List(DirTree),
   under_construction: Option(#(String, List(List(String)))),
   remaining: List(List(String)),
 ) -> List(DirTree) {
   let package_current = fn(name: String, decomposed_paths) {
     assert name != ""
-    let subdirs = from_paths_acc([], None, decomposed_paths |> list.reverse)
+    let subdirs = from_terminals_acc([], None, decomposed_paths |> list.reverse)
     Dirpath(name, subdirs)
   }
 
@@ -47,16 +47,16 @@ fn from_paths_acc(
       case first {
         [] -> panic
 
-        [""] -> from_paths_acc(previous, None, rest)
+        [""] -> from_terminals_acc(previous, None, rest)
 
         [filename] -> {
           let constructed = Filepath(filename)
-          from_paths_acc([constructed, ..previous], None, rest)
+          from_terminals_acc([constructed, ..previous], None, rest)
         }
 
         [dirname, ..decomposed_path] -> {
           assert dirname != ""
-          from_paths_acc(previous, Some(#(dirname, [decomposed_path])), rest)
+          from_terminals_acc(previous, Some(#(dirname, [decomposed_path])), rest)
         }
       }
     }
@@ -71,7 +71,7 @@ fn from_paths_acc(
           assert filename != name
           let constructed1 = package_current(name, decomposed_paths)
           let constructed2 = Filepath(filename)
-          from_paths_acc(
+          from_terminals_acc(
             [constructed2, constructed1, ..previous],
             None,
             rest,
@@ -79,7 +79,7 @@ fn from_paths_acc(
         }
 
         [dirname, ..decomposed_path] if dirname == name -> {
-          from_paths_acc(
+          from_terminals_acc(
             previous,
             Some(#(name, [decomposed_path, ..decomposed_paths])),
             rest,
@@ -88,7 +88,7 @@ fn from_paths_acc(
 
         [dirname, ..decomposed_path] if dirname != name -> {
           let constructed1 = package_current(name, decomposed_paths)
-          from_paths_acc(
+          from_terminals_acc(
             [constructed1, ..previous],
             Some(#(dirname, [decomposed_path])),
             rest,
@@ -168,7 +168,7 @@ pub fn from_terminals(
     False -> dirpath
   }
 
-  Dirpath(dirpath, from_paths_acc([], None, paths))
+  Dirpath(dirpath, from_terminals_acc([], None, paths))
 }
 
 /// Sorts a DirTree recursively from a given order
