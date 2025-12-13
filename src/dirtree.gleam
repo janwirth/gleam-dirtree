@@ -13,7 +13,7 @@ import gleam/string
 /// dirpath, as a relative path from the current working
 /// directory, may be empty.
 /// 
-/// Examples:
+/// *Examples*
 /// 
 /// - `Filepath("examples/pngs/logo.png")`
 /// - `Dirpath("../src", [])`
@@ -114,7 +114,7 @@ fn from_paths_acc(
 /// 
 /// Intermediate 
 /// 
-/// Example.
+/// *Examples*
 /// 
 /// ```gleam
 /// let tree = dirtree.from_paths(
@@ -174,7 +174,7 @@ pub fn from_terminals(
 /// Sorts a DirTree recursively from a given order
 /// function.
 /// 
-/// Example.
+/// *Examples*
 /// 
 /// ```gleam
 /// let tree = dt.from_terminals(
@@ -241,7 +241,7 @@ pub fn sort(
   }
 }
 
-/// Recursively map a DirTree 1ith usint a 1-to-1 transform.
+/// Recursively map a DirTree using a 1-to-1 transform. Maps children before parents (depth-first).
 pub fn map(
   tree: DirTree,
   m: fn(DirTree) -> DirTree,
@@ -255,7 +255,7 @@ pub fn map(
   }
 }
 
-/// Recursively map a DirTree 1ith usint a 1-to-many transform.
+/// Recursively map a DirTree using a 1-to-many transform. Maps children before parents (depth-first).
 pub fn flat_map(
   tree: DirTree,
   m: fn(DirTree) -> List(DirTree),
@@ -269,14 +269,14 @@ pub fn flat_map(
   }
 }
 
-/// Recursively filters a DirTree using a booldean condition
+/// Recursively filters a DirTree using a boolean condition
 /// applied in depth-first fashion,
 ///
-/// Returns an Error(Nil) if the root of the tree is filtered
+/// Returns an `Error(Nil)` if the root of the tree is filtered
 /// out.
 ///
-/// Does not filter out empty directories. See alsoe 'prune'
-/// and 'prune_and_filter'.
+/// Does not filter out empty directories. See also `prune`
+/// and `prune_and_filter`.
 pub fn filter(
   tree: DirTree,
   condition: fn(DirTree) -> Bool,
@@ -312,11 +312,11 @@ pub fn prune(
   }
 }
 
-/// Recursively filters a DirTree using a booldean condition
+/// Recursively filters a DirTree using a boolean condition
 /// applied in depth-first fashion while removing empty directories
 /// as well.
 ///
-/// Returns an Error(Nil) if the root of the root resolves to an
+/// Returns an `Error(Nil)` if the root of the root resolves to an
 /// empty directory or to a filepath that does not meet the condition.
 pub fn filter_and_prune(
   tree: DirTree,
@@ -341,7 +341,7 @@ pub fn filter_and_prune(
 /// Concatenates names of directories containing a single child
 /// with that of their child.
 /// 
-/// Example.
+/// *Examples*
 /// 
 /// ```gleam
 /// Dirpath("a", [Dirpath("b", [Filepath("foo.png")])])
@@ -373,7 +373,7 @@ pub fn collapse(
 /// Expands compound filepaths and dirpaths into
 /// nested sequences of atomic directories.
 /// 
-/// Example.
+/// *Examples*
 /// 
 /// ```gleam
 /// Dirpath("a/b/c", [Filepath("z")])
@@ -413,7 +413,7 @@ pub fn expand(
   tree |> map(m)
 }
 
-/// Returns a list of files in the DirTree, in the same order
+/// Returns a list of files in the DirTree in the same order
 /// as they appear in the tree.
 pub fn files(
   tree: DirTree,
@@ -434,7 +434,7 @@ pub fn files(
 /// Returns a list of paths to terminal elements of a DirTree,
 /// these being either files or empty directories.
 /// 
-/// Empty directories are encoded by strings terminated with a "/".
+/// Empty directories are encoded by strings terminated with a `/`.
 pub fn terminals(
   tree: DirTree,
 ) -> List(String) {
@@ -547,7 +547,7 @@ fn blocks_4_indentation(
 
 /// Pretty-print a DirTree at a custom level of indentation.
 /// 
-/// Example.
+/// *Examples*
 /// 
 /// ```gleam
 /// let tree = dt.from_terminals(

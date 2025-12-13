@@ -7,14 +7,13 @@
 gleam add dirtree@1
 ```
 
-A simple package for loading, reordering, and pretty-printing
-directory trees.
+A directory tree abstraction including a pretty-printer.
 
 ```gleam
 import dirtree
 
 pub fn main() -> Nil {
-  let tree = dirtree.from_paths(
+  let tree = dirtree.from_terminals(
     "../examples",
     [
       "futuristic/pngs/png2.png",

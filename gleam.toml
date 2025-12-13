@@ -1,6 +1,6 @@
 name = "dirtree"
-version = "1.0.0"
-description = "A collection of utilities for building, modifying, and pretty-printing directory trees."
+version = "1.0.1"
+description = "A directory tree abstraction including a pretty-printer"
 licences = ["Apache-2.0"]
 repository = { type = "github", user = "", repo = "" }
 
