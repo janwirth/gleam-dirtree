@@ -102,21 +102,22 @@ fn from_terminals_acc(
 }
 
 /// A function that constructs a `DirTree` from a path to a
-/// directory, forming the dirpath,  and a  of relative paths
+/// directory, forming the dirpath, and a list of relative paths
 /// from within that directory to either files or empty directories,
 /// i.e., to the "terminal elements" of the directory tree. Terminals
-/// that end in `/` are interpreted as empty directories.
+/// that end in `/` are interpreted as empty directories, others are
+/// interpreted as filepaths. The given set of terminals should be
+/// prefix-free, but the order of terminals is arbitrary and will
+/// be ignored.
 /// 
-/// File paths may be out of order. 
-/// 
-/// Intermediate directories contained within the file paths
-/// should NOT be listed separately, lest they be confused with
-/// files!
+/// In particular, intermediate directories contained within the 
+/// paths of other terminals should NOT be listed separately, lest
+/// they be confused with files or empty directories!
 /// 
 /// **Examples**
 /// 
 /// ```gleam
-/// let tree = dirtree.from_paths(
+/// let tree = dirtree.from_terminals(
 ///   "../examples",
 ///   [
 ///     "futuristic/pngs/png2.png",
