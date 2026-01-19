@@ -26,7 +26,7 @@ pub fn main() -> Nil {
   )
 
   tree
-  |> dt.pretty_print
+  |> dt.pretty_print(1)
   |> string.join("\n")
   |> io.println
 

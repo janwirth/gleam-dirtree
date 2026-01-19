@@ -273,11 +273,11 @@ pub fn flat_map(
 /// Recursively filters a `DirTree` using a boolean condition
 /// applied in depth-first fashion,
 ///
-/// Returns an `Error(Nil)` if the root of the tree is filtered
-/// out.
+/// Returns an `Error(Nil)` if the root of the tree resolves
+/// to a DirTree instance that does not meet the condition.
 ///
 /// Does not filter out empty directories. See also `prune`
-/// and `prune_and_filter`.
+/// and `filter_and_prune`.
 pub fn filter(
   tree: DirTree,
   condition: fn(DirTree) -> Bool,
@@ -300,43 +300,32 @@ pub fn filter(
 pub fn prune(
   tree: DirTree,
 ) -> Result(DirTree, Nil) {
-  let m = fn(t) {
+  let condition = fn(t) {
     case t {
-      Dirpath(_, []) -> []
-      _ -> [t]
+      Dirpath(_, []) -> False
+      _ -> True
     }
   }
-  case flat_map(tree, m) {
-    [] -> Error(Nil)
-    [root] -> Ok(root)
-    _ -> panic
-  }
+  filter(tree, condition)
 }
 
 /// Recursively filters a `DirTree` using a boolean condition
-/// applied in depth-first fashion while removing empty directories
-/// as well.
-///
-/// Returns an `Error(Nil)` if the root of the root resolves to an
-/// empty directory or to a filepath that does not meet the condition.
+/// applied in depth-first fashion while also removing empty
+/// directories.
+/// 
+/// Returns `Error(Nil)` if the root of the tree is filtered
+/// out by the process.
 pub fn filter_and_prune(
   tree: DirTree,
   condition: fn(DirTree) -> Bool,
 ) -> Result(DirTree, Nil) {
-  let m = fn(t) {
+  let updated_condition = fn(t) {
     case t {
-      Dirpath(_, []) -> []
-      _ -> case condition(t) {
-        True -> [t]
-        False -> []
-      }
+      Dirpath(_, []) -> False
+      _ -> condition(t)
     }
   }
-  case flat_map(tree, m) {
-    [] -> Error(Nil)
-    [root] -> Ok(root)
-    _ -> panic
-  }
+  filter(tree, updated_condition)
 }
 
 /// Concatenates names of directories containing a single child

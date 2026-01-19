@@ -1,8 +1,8 @@
 name = "dirtree"
-version = "1.0.3"
+version = "1.0.4"
 description = "A directory tree abstraction including a pretty-printer"
 licences = ["Apache-2.0"]
-repository = { type = "github", user = "", repo = "" }
+repository = { type = "github", user = "vistuleB", repo = "dirtree" }
 
 # links = [{ title = "Website", href = "" }]
 #
