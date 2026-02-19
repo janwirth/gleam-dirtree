@@ -423,6 +423,46 @@ pub fn expand(
   tree |> map(m)
 }
 
+pub type FlattenedType {
+  File
+  Dir
+}
+
+pub type FlattenedItem(a) {
+  FlattenedItem(
+    item_name: String,
+    path: List(String),
+    item_type: FlattenedType,
+    meta: Option(a),
+  )
+}
+
+fn flatten_acc(
+  tree: DirTree(a),
+  path: List(String),
+) -> List(FlattenedItem(a)) {
+  case tree {
+    Filepath(name, meta) -> [
+      FlattenedItem(item_name: name, path: path, item_type: File, meta: meta),
+    ]
+    Dirpath(name, contents, meta) -> {
+      let item = FlattenedItem(
+        item_name: name,
+        path: path,
+        item_type: Dir,
+        meta: meta,
+      )
+      let child_path = list.append(path, [name])
+      [item, ..list.flat_map(contents, fn(c) { flatten_acc(c, child_path) })]
+    }
+  }
+}
+
+/// Returns a flat list of all nodes with item_name, path, type, and meta.
+pub fn flatten(tree: DirTree(a)) -> List(FlattenedItem(a)) {
+  flatten_acc(tree, [])
+}
+
 /// Returns a list of files in the DirTree in the same order
 /// as they appear in the tree.
 pub fn files(
