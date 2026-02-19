@@ -1,4 +1,5 @@
 import gleeunit/should
+import gleam/option.{None}
 import gleam/order
 import gleam/result
 import gleeunit
@@ -29,7 +30,41 @@ pub fn filter_test() {
   )
   |> dt.filter(fn(path) { !string.ends_with(path.name, ".png")} )
   |> should.equal(
-    Ok(Dirpath("/", [Dirpath("a", [Dirpath("b", [Dirpath("c", [Dirpath("d", [Dirpath("e", [Dirpath("f", [], None)], None)], None)], None)], None)], None)], None))
+    Ok(Dirpath(
+      "/",
+      [
+        Dirpath(
+          "a",
+          [
+            Dirpath(
+              "b",
+              [
+                Dirpath(
+                  "c",
+                  [
+                    Dirpath(
+                      "d",
+                      [
+                        Dirpath(
+                          "e",
+                          [Dirpath("f", [], None)],
+                          None,
+                        ),
+                      ],
+                      None,
+                    ),
+                  ],
+                  None,
+                ),
+              ],
+              None,
+            ),
+          ],
+          None,
+        ),
+      ],
+      None,
+    )),
   )
 
   dt.from_paths(
@@ -41,7 +76,42 @@ pub fn filter_test() {
   )
   |> dt.filter(fn(path) { !string.contains(path.name, "2")} )
   |> should.equal(
-    Ok(Dirpath("/", [Dirpath("a", [Dirpath("b", [Dirpath("c", [Dirpath("d", [Dirpath("e", [Dirpath("f", [], None)], None), Filepath("logo1.png", None)], None)], None)], None)], None)], None))
+    Ok(Dirpath(
+      "/",
+      [
+        Dirpath(
+          "a",
+          [
+            Dirpath(
+              "b",
+              [
+                Dirpath(
+                  "c",
+                  [
+                    Dirpath(
+                      "d",
+                      [
+                        Dirpath(
+                          "e",
+                          [Dirpath("f", [], None)],
+                          None,
+                        ),
+                        Filepath("logo1.png", None),
+                      ],
+                      None,
+                    ),
+                  ],
+                  None,
+                ),
+              ],
+              None,
+            ),
+          ],
+          None,
+        ),
+      ],
+      None,
+    )),
   )
 
   dt.from_paths(
@@ -53,7 +123,35 @@ pub fn filter_test() {
   )
   |> dt.filter_and_prune(fn(path) { !string.contains(path.name, "2")} )
   |> should.equal(
-    Ok(Dirpath("/", [Dirpath("a", [Dirpath("b", [Dirpath("c", [Dirpath("d", [Filepath("logo1.png", None)], None)], None)], None)], None)], None))
+    Ok(Dirpath(
+      "/",
+      [
+        Dirpath(
+          "a",
+          [
+            Dirpath(
+              "b",
+              [
+                Dirpath(
+                  "c",
+                  [
+                    Dirpath(
+                      "d",
+                      [Filepath("logo1.png", None)],
+                      None,
+                    ),
+                  ],
+                  None,
+                ),
+              ],
+              None,
+            ),
+          ],
+          None,
+        ),
+      ],
+      None,
+    )),
   )
 
   dt.from_paths(
@@ -66,7 +164,35 @@ pub fn filter_test() {
   |> dt.filter(fn(path) { !string.contains(path.name, "2")} )
   |> result.try(dt.prune)
   |> should.equal(
-    Ok(Dirpath("/", [Dirpath("a", [Dirpath("b", [Dirpath("c", [Dirpath("d", [Filepath("logo1.png", None)], None)], None)], None)], None)], None))
+    Ok(Dirpath(
+      "/",
+      [
+        Dirpath(
+          "a",
+          [
+            Dirpath(
+              "b",
+              [
+                Dirpath(
+                  "c",
+                  [
+                    Dirpath(
+                      "d",
+                      [Filepath("logo1.png", None)],
+                      None,
+                    ),
+                  ],
+                  None,
+                ),
+              ],
+              None,
+            ),
+          ],
+          None,
+        ),
+      ],
+      None,
+    )),
   )
 }
 
@@ -79,7 +205,48 @@ pub fn collapse_expand_test() {
     ],
   )
   |> should.equal(
-    Dirpath("/", [Dirpath("a", [Dirpath("b", [Dirpath("c", [Dirpath("d", [Dirpath("e", [Dirpath("f", [Filepath("logo2.png", None)], None)], None), Filepath("logo1.png", None)], None)], None)], None)], None)], None)], None)
+    Dirpath(
+      "/",
+      [
+        Dirpath(
+          "a",
+          [
+            Dirpath(
+              "b",
+              [
+                Dirpath(
+                  "c",
+                  [
+                    Dirpath(
+                      "d",
+                      [
+                        Dirpath(
+                          "e",
+                          [
+                            Dirpath(
+                              "f",
+                              [Filepath("logo2.png", None)],
+                              None,
+                            ),
+                          ],
+                          None,
+                        ),
+                        Filepath("logo1.png", None),
+                      ],
+                      None,
+                    ),
+                  ],
+                  None,
+                ),
+              ],
+              None,
+            ),
+          ],
+          None,
+        ),
+      ],
+      None,
+    ),
   )
 
   dt.from_paths(
@@ -104,7 +271,48 @@ pub fn collapse_expand_test() {
   |> dt.collapse
   |> dt.expand
   |> should.equal(
-    Dirpath("/", [Dirpath("a", [Dirpath("b", [Dirpath("c", [Dirpath("d", [Dirpath("e", [Dirpath("f", [Filepath("logo2.png", None)], None)], None), Filepath("logo1.png", None)], None)], None)], None)], None)], None)], None)
+    Dirpath(
+      "/",
+      [
+        Dirpath(
+          "a",
+          [
+            Dirpath(
+              "b",
+              [
+                Dirpath(
+                  "c",
+                  [
+                    Dirpath(
+                      "d",
+                      [
+                        Dirpath(
+                          "e",
+                          [
+                            Dirpath(
+                              "f",
+                              [Filepath("logo2.png", None)],
+                              None,
+                            ),
+                          ],
+                          None,
+                        ),
+                        Filepath("logo1.png", None),
+                      ],
+                      None,
+                    ),
+                  ],
+                  None,
+                ),
+              ],
+              None,
+            ),
+          ],
+          None,
+        ),
+      ],
+      None,
+    ),
   )
 
   dt.from_paths(
@@ -117,7 +325,54 @@ pub fn collapse_expand_test() {
   |> dt.collapse
   |> dt.expand
   |> should.equal(
-    Dirpath("..", [Dirpath("examples", [Dirpath("a", [Dirpath("b", [Dirpath("c", [Dirpath("d", [Dirpath("e", [Dirpath("f", [Filepath("logo2.png", None)], None)], None), Filepath("logo1.png", None)], None)], None)], None)], None)], None)], None)])
+    Dirpath(
+      "..",
+      [
+        Dirpath(
+          "examples",
+          [
+            Dirpath(
+              "a",
+              [
+                Dirpath(
+                  "b",
+                  [
+                    Dirpath(
+                      "c",
+                      [
+                        Dirpath(
+                          "d",
+                          [
+                            Dirpath(
+                              "e",
+                              [
+                                Dirpath(
+                                  "f",
+                                  [Filepath("logo2.png", None)],
+                                  None,
+                                ),
+                              ],
+                              None,
+                            ),
+                            Filepath("logo1.png", None),
+                          ],
+                          None,
+                        ),
+                      ],
+                      None,
+                    ),
+                  ],
+                  None,
+                ),
+              ],
+              None,
+            ),
+          ],
+          None,
+        ),
+      ],
+      None,
+    ),
   )
 }
 
