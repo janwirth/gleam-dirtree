@@ -19,20 +19,25 @@ import gleam/string
 /// - `Dirpath("../src", [])`
 /// - `Dirpath("", [])`
 /// - `Dirpath("examples", [Filepath("pngs/logo.png")])`
-pub type DirTree {
-  Filepath(name: String)
-  Dirpath(name: String, contents: List(DirTree))
+pub type DirTree(a) {
+  Filepath(name: String, meta: Option(a))
+  Dirpath(name: String, contents: List(DirTree(a)), meta: Option(a))
 }
 
 fn from_terminals_acc(
-  previous: List(DirTree),
-  under_construction: Option(#(String, List(List(String)))),
-  remaining: List(List(String)),
-) -> List(DirTree) {
-  let package_current = fn(name: String, decomposed_paths) {
+  previous: List(DirTree(a)),
+  under_construction: Option(#(String, List(#(List(String), Option(a))))),
+  remaining: List(#(List(String), Option(a))),
+) -> List(DirTree(a)) {
+  let package_current = fn(name: String, decomposed_paths: List(#(List(String), Option(a)))) {
     assert name != ""
-    let subdirs = from_terminals_acc([], None, decomposed_paths |> list.reverse)
-    Dirpath(name, subdirs)
+    case decomposed_paths {
+      [#([""], meta)] -> Dirpath(name, [], meta)
+      _ -> {
+        let subdirs = from_terminals_acc([], None, decomposed_paths |> list.reverse)
+        Dirpath(name, subdirs, None)
+      }
+    }
   }
 
   case remaining, under_construction {
@@ -43,25 +48,25 @@ fn from_terminals_acc(
       [constructed, ..previous] |> list.reverse
     }
 
-    [first, ..rest], None -> {
+    [#(first, meta), ..rest], None -> {
       case first {
         [] -> panic
 
         [""] -> from_terminals_acc(previous, None, rest)
 
         [filename] -> {
-          let constructed = Filepath(filename)
+          let constructed = Filepath(filename, meta)
           from_terminals_acc([constructed, ..previous], None, rest)
         }
 
         [dirname, ..decomposed_path] -> {
           assert dirname != ""
-          from_terminals_acc(previous, Some(#(dirname, [decomposed_path])), rest)
+          from_terminals_acc(previous, Some(#(dirname, [#(decomposed_path, meta)])), rest)
         }
       }
     }
 
-    [first, ..rest], Some(#(name, decomposed_paths)) -> {
+    [#(first, meta), ..rest], Some(#(name, decomposed_paths)) -> {
       case first {
         [] -> panic
 
@@ -70,7 +75,7 @@ fn from_terminals_acc(
         [filename] -> {
           assert filename != name
           let constructed1 = package_current(name, decomposed_paths)
-          let constructed2 = Filepath(filename)
+          let constructed2 = Filepath(filename, meta)
           from_terminals_acc(
             [constructed2, constructed1, ..previous],
             None,
@@ -81,7 +86,7 @@ fn from_terminals_acc(
         [dirname, ..decomposed_path] if dirname == name -> {
           from_terminals_acc(
             previous,
-            Some(#(name, [decomposed_path, ..decomposed_paths])),
+            Some(#(name, [#(decomposed_path, meta), ..decomposed_paths])),
             rest,
           )
         }
@@ -90,7 +95,7 @@ fn from_terminals_acc(
           let constructed1 = package_current(name, decomposed_paths)
           from_terminals_acc(
             [constructed1, ..previous],
-            Some(#(dirname, [decomposed_path])),
+            Some(#(dirname, [#(decomposed_path, meta)])),
             rest,
           )
         }
@@ -151,24 +156,39 @@ fn from_terminals_acc(
 /// ```
 pub fn from_terminals(
   dirpath: String,
-  terminals: List(String),
-) -> DirTree {
+  terminals: List(#(String, Option(a))),
+) -> DirTree(a) {
   assert list.all(
     terminals,
-    fn(p) { !string.starts_with(p, "/") },
+    fn(t) {
+      let #(path, _) = t
+      !string.starts_with(path, "/")
+    },
   )
 
   let terminals =
     terminals
-    |> list.sort(string.compare)
-    |> list.map(string.split(_, "/"))
+    |> list.sort(fn(a, b) {
+      let #(pa, _) = a
+      let #(pb, _) = b
+      string.compare(pa, pb)
+    })
+    |> list.map(fn(t) {
+      let #(path, meta) = t
+      #(string.split(path, "/"), meta)
+    })
 
   let dirpath = case string.ends_with(dirpath, "/") && dirpath != "/" {
     True -> string.drop_end(dirpath, 1)
     False -> dirpath
   }
 
-  Dirpath(dirpath, from_terminals_acc([], None, terminals))
+  Dirpath(dirpath, from_terminals_acc([], None, terminals), None)
+}
+
+/// Convenience: build from list of path strings, all with None meta.
+pub fn from_paths(dirpath: String, paths: List(String)) -> DirTree(Nil) {
+  from_terminals(dirpath, list.map(paths, fn(p) { #(p, None) }))
 }
 
 /// Sorts a `DirTree` recursively from a given order
@@ -226,31 +246,31 @@ pub fn from_terminals(
 /// //    └─ .latter
 /// ```
 pub fn sort(
-  tree: DirTree,
-  order: fn(DirTree, DirTree) -> order.Order,
-) -> DirTree {
+  tree: DirTree(a),
+  order: fn(DirTree(a), DirTree(a)) -> order.Order,
+) -> DirTree(a) {
   case tree {
-    Filepath(_) -> tree
-    Dirpath(name, contents) -> {
+    Filepath(_, _) -> tree
+    Dirpath(name, contents, meta) -> {
       let contents =
         contents
         |> list.map(sort(_, order))
         |> list.sort(order)
-      Dirpath(name, contents)
+      Dirpath(name, contents, meta)
     }
   }
 }
 
 /// Recursively map a `DirTree` using a 1-to-1 transform. Maps children before parents.
 pub fn map(
-  tree: DirTree,
-  m: fn(DirTree) -> DirTree,
-) -> DirTree {
+  tree: DirTree(a),
+  m: fn(DirTree(a)) -> DirTree(a),
+) -> DirTree(a) {
   case tree {
-    Filepath(_) -> m(tree)
-    Dirpath(name, contents) -> {
+    Filepath(_, _) -> m(tree)
+    Dirpath(name, contents, meta) -> {
       let contents = list.map(contents, map(_, m))
-      m(Dirpath(name, contents))
+      m(Dirpath(name, contents, meta))
     }
   }
 }
@@ -258,14 +278,14 @@ pub fn map(
 /// Recursively map a `DirTree` using a 1-to-many transform.
 /// Maps children before parents.
 pub fn flat_map(
-  tree: DirTree,
-  m: fn(DirTree) -> List(DirTree),
-) -> List(DirTree) {
+  tree: DirTree(a),
+  m: fn(DirTree(a)) -> List(DirTree(a)),
+) -> List(DirTree(a)) {
   case tree {
-    Filepath(_) -> m(tree)
-    Dirpath(name, contents) -> {
+    Filepath(_, _) -> m(tree)
+    Dirpath(name, contents, meta) -> {
       let contents = list.flat_map(contents, flat_map(_, m))
-      m(Dirpath(name, contents))
+      m(Dirpath(name, contents, meta))
     }
   }
 }
@@ -279,9 +299,9 @@ pub fn flat_map(
 /// Does not filter out empty directories. See also `prune`
 /// and `filter_and_prune`.
 pub fn filter(
-  tree: DirTree,
-  condition: fn(DirTree) -> Bool,
-) -> Result(DirTree, Nil) {
+  tree: DirTree(a),
+  condition: fn(DirTree(a)) -> Bool,
+) -> Result(DirTree(a), Nil) {
   let m = fn(t) {
     case condition(t) {
       False -> []
@@ -298,11 +318,11 @@ pub fn filter(
 /// Recursively removes empty directories in depth-first fashion.
 /// Returns Error(Nil) if the root resolves to an empty directory.
 pub fn prune(
-  tree: DirTree,
-) -> Result(DirTree, Nil) {
+  tree: DirTree(a),
+) -> Result(DirTree(a), Nil) {
   let condition = fn(t) {
     case t {
-      Dirpath(_, []) -> False
+      Dirpath(_, [], _) -> False
       _ -> True
     }
   }
@@ -316,12 +336,12 @@ pub fn prune(
 /// Returns `Error(Nil)` if the root of the tree is filtered
 /// out by the process.
 pub fn filter_and_prune(
-  tree: DirTree,
-  condition: fn(DirTree) -> Bool,
-) -> Result(DirTree, Nil) {
+  tree: DirTree(a),
+  condition: fn(DirTree(a)) -> Bool,
+) -> Result(DirTree(a), Nil) {
   let updated_condition = fn(t) {
     case t {
-      Dirpath(_, []) -> False
+      Dirpath(_, [], _) -> False
       _ -> condition(t)
     }
   }
@@ -340,18 +360,18 @@ pub fn filter_and_prune(
 /// // -> Filepath("a/b/foo.png")
 /// ````
 pub fn collapse(
-  tree: DirTree,
-) -> DirTree {
-  let m = fn(t: DirTree) -> DirTree {
+  tree: DirTree(a),
+) -> DirTree(a) {
+  let m = fn(t: DirTree(a)) -> DirTree(a) {
     case t {
-      Dirpath(name, [one]) -> {
+      Dirpath(name, [one], _) -> {
         let prefix = case name {
           "/" -> name
           _ -> name <> "/"
         }
         case one {
-          Filepath(_) -> Filepath(prefix <> one.name)
-          Dirpath(_, contents) -> Dirpath(prefix <> one.name, contents)
+          Filepath(_, meta) -> Filepath(prefix <> one.name, meta)
+          Dirpath(_, contents, meta) -> Dirpath(prefix <> one.name, contents, meta)
         }
       }
       _ -> t
@@ -374,16 +394,16 @@ pub fn collapse(
 /// // Dirpath("a", [Dirpath("b", [Dirpath("c", [Filepath("z")])])])
 /// ```
 pub fn expand(
-  tree: DirTree,
-) -> DirTree {
-  let m = fn(t: DirTree) -> DirTree {
+  tree: DirTree(a),
+) -> DirTree(a) {
+  let m = fn(t: DirTree(a)) -> DirTree(a) {
     case string.contains(t.name, "/") && t.name != "/" {
       False -> t
       True -> {
         let assert [first, ..rest] = string.split(t.name, "/") |> list.reverse
         let nucleus = case t {
-          Filepath(_) -> Filepath(first)
-          Dirpath(_, contents) -> Dirpath(first, contents)
+          Filepath(_, meta) -> Filepath(first, meta)
+          Dirpath(_, contents, meta) -> Dirpath(first, contents, meta)
         }
         assert rest != []
         list.fold(
@@ -394,7 +414,7 @@ pub fn expand(
               "" -> "/"
               _ -> dirname
             }
-            Dirpath(dirname, [acc])
+            Dirpath(dirname, [acc], None)
           }
         )
       }
@@ -406,11 +426,11 @@ pub fn expand(
 /// Returns a list of files in the DirTree in the same order
 /// as they appear in the tree.
 pub fn files(
-  tree: DirTree,
+  tree: DirTree(a),
 ) -> List(String) {
   case tree {
-    Filepath(path) -> [path]
-    Dirpath(path, contents) -> {
+    Filepath(path, _) -> [path]
+    Dirpath(path, contents, _) -> {
       let prefix = case path {
         "/" -> "/"
         _ -> path <> "/"
@@ -426,11 +446,11 @@ pub fn files(
 /// 
 /// Empty directories are encoded by strings terminated with a `/`.
 pub fn terminals(
-  tree: DirTree,
+  tree: DirTree(a),
 ) -> List(String) {
   case tree {
-    Filepath(path) -> [path]
-    Dirpath(path, contents) -> {
+    Filepath(path, _) -> [path]
+    Dirpath(path, contents, _) -> {
       case contents, path {
         [], "/" -> [path]
         [], _ -> [path <> "/"]
@@ -484,12 +504,12 @@ fn pretty_printer_add_margin(
 }
 
 fn pretty_print_internal(
-  tree: DirTree,
+  tree: DirTree(a),
   blocks: PrettyPrinterMarginBlocks,
 ) -> List(String) {
   case tree {
-    Filepath(path) -> [path]
-    Dirpath(path, children) -> {
+    Filepath(path, _) -> [path]
+    Dirpath(path, children, _) -> {
       let num_children = children |> list.length
       let xtra_margin = case string.reverse(path |> string.drop_end(1)) |> string.split_once("/") {
         Ok(#(_, after)) -> string.length(after) + 1
@@ -563,6 +583,6 @@ fn blocks_4_indentation(
 /// //             ├────────── README.md
 /// //             └────────── old-README.md
 /// ```
-pub fn pretty_print(tree: DirTree, indentation: Int) -> List(String) {
+pub fn pretty_print(tree: DirTree(a), indentation: Int) -> List(String) {
   pretty_print_internal(tree, blocks_4_indentation(indentation))
 }

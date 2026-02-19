@@ -10,7 +10,7 @@ pub fn main() -> Nil {
 }
 
 pub fn filter_test() {
-  dt.from_terminals(
+  dt.from_paths(
     "/",
     [
       "a/b/c/d/e/f/logo2.png",
@@ -20,7 +20,7 @@ pub fn filter_test() {
   |> dt.filter_and_prune(fn(path) { !string.ends_with(path.name, ".png")} )
   |> should.equal(Error(Nil))
 
-  dt.from_terminals(
+  dt.from_paths(
     "/",
     [
       "a/b/c/d/e/f/logo2.png",
@@ -29,10 +29,10 @@ pub fn filter_test() {
   )
   |> dt.filter(fn(path) { !string.ends_with(path.name, ".png")} )
   |> should.equal(
-    Ok(Dirpath("/", [Dirpath("a", [Dirpath("b", [Dirpath("c", [Dirpath("d", [Dirpath("e", [Dirpath("f", [])])])])])])]))
+    Ok(Dirpath("/", [Dirpath("a", [Dirpath("b", [Dirpath("c", [Dirpath("d", [Dirpath("e", [Dirpath("f", [], None)], None)], None)], None)], None)], None)], None))
   )
 
-  dt.from_terminals(
+  dt.from_paths(
     "/",
     [
       "a/b/c/d/e/f/logo2.png",
@@ -41,10 +41,10 @@ pub fn filter_test() {
   )
   |> dt.filter(fn(path) { !string.contains(path.name, "2")} )
   |> should.equal(
-    Ok(Dirpath("/", [Dirpath("a", [Dirpath("b", [Dirpath("c", [Dirpath("d", [Dirpath("e", [Dirpath("f", [])]), Filepath("logo1.png")])])])])]))
+    Ok(Dirpath("/", [Dirpath("a", [Dirpath("b", [Dirpath("c", [Dirpath("d", [Dirpath("e", [Dirpath("f", [], None)], None), Filepath("logo1.png", None)], None)], None)], None)], None)], None))
   )
 
-  dt.from_terminals(
+  dt.from_paths(
     "/",
     [
       "a/b/c/d/e/f/logo2.png",
@@ -53,10 +53,10 @@ pub fn filter_test() {
   )
   |> dt.filter_and_prune(fn(path) { !string.contains(path.name, "2")} )
   |> should.equal(
-    Ok(Dirpath("/", [Dirpath("a", [Dirpath("b", [Dirpath("c", [Dirpath("d", [Filepath("logo1.png")])])])])]))
+    Ok(Dirpath("/", [Dirpath("a", [Dirpath("b", [Dirpath("c", [Dirpath("d", [Filepath("logo1.png", None)], None)], None)], None)], None)], None))
   )
 
-  dt.from_terminals(
+  dt.from_paths(
     "/",
     [
       "a/b/c/d/e/f/logo2.png",
@@ -66,12 +66,12 @@ pub fn filter_test() {
   |> dt.filter(fn(path) { !string.contains(path.name, "2")} )
   |> result.try(dt.prune)
   |> should.equal(
-    Ok(Dirpath("/", [Dirpath("a", [Dirpath("b", [Dirpath("c", [Dirpath("d", [Filepath("logo1.png")])])])])]))
+    Ok(Dirpath("/", [Dirpath("a", [Dirpath("b", [Dirpath("c", [Dirpath("d", [Filepath("logo1.png", None)], None)], None)], None)], None)], None))
   )
 }
 
 pub fn collapse_expand_test() {
-  dt.from_terminals(
+  dt.from_paths(
     "/",
     [
       "a/b/c/d/e/f/logo2.png",
@@ -79,10 +79,10 @@ pub fn collapse_expand_test() {
     ],
   )
   |> should.equal(
-    Dirpath("/", [Dirpath("a", [Dirpath("b", [Dirpath("c", [Dirpath("d", [Dirpath("e", [Dirpath("f", [Filepath("logo2.png")])]), Filepath("logo1.png")])])])])])
+    Dirpath("/", [Dirpath("a", [Dirpath("b", [Dirpath("c", [Dirpath("d", [Dirpath("e", [Dirpath("f", [Filepath("logo2.png", None)], None)], None), Filepath("logo1.png", None)], None)], None)], None)], None)], None)], None)
   )
 
-  dt.from_terminals(
+  dt.from_paths(
     "/",
     [
       "a/b/c/d/e/f/logo2.png",
@@ -91,10 +91,10 @@ pub fn collapse_expand_test() {
   )
   |> dt.collapse
   |> should.equal(
-    Dirpath("/a/b/c/d", [Filepath("e/f/logo2.png"), Filepath("logo1.png")])
+    Dirpath("/a/b/c/d", [Filepath("e/f/logo2.png", None), Filepath("logo1.png", None)], None)
   )
 
-  dt.from_terminals(
+  dt.from_paths(
     "/",
     [
       "a/b/c/d/e/f/logo2.png",
@@ -104,10 +104,10 @@ pub fn collapse_expand_test() {
   |> dt.collapse
   |> dt.expand
   |> should.equal(
-    Dirpath("/", [Dirpath("a", [Dirpath("b", [Dirpath("c", [Dirpath("d", [Dirpath("e", [Dirpath("f", [Filepath("logo2.png")])]), Filepath("logo1.png")])])])])])
+    Dirpath("/", [Dirpath("a", [Dirpath("b", [Dirpath("c", [Dirpath("d", [Dirpath("e", [Dirpath("f", [Filepath("logo2.png", None)], None)], None), Filepath("logo1.png", None)], None)], None)], None)], None)], None)], None)
   )
 
-  dt.from_terminals(
+  dt.from_paths(
     "../examples",
     [
       "a/b/c/d/e/f/logo2.png",
@@ -117,12 +117,12 @@ pub fn collapse_expand_test() {
   |> dt.collapse
   |> dt.expand
   |> should.equal(
-    Dirpath("..", [Dirpath("examples", [Dirpath("a", [Dirpath("b", [Dirpath("c", [Dirpath("d", [Dirpath("e", [Dirpath("f", [Filepath("logo2.png")])]), Filepath("logo1.png")])])])])])])
+    Dirpath("..", [Dirpath("examples", [Dirpath("a", [Dirpath("b", [Dirpath("c", [Dirpath("d", [Dirpath("e", [Dirpath("f", [Filepath("logo2.png", None)], None)], None), Filepath("logo1.png", None)], None)], None)], None)], None)], None)], None)])
   )
 }
 
 pub fn files_test() {
-  dt.from_terminals(
+  dt.from_paths(
     "/",
     [
       "a/b/c/d/e/f/logo2.png",
@@ -135,7 +135,7 @@ pub fn files_test() {
     "/a/b/c/d/logo1.png",
   ])
 
-  dt.from_terminals(
+  dt.from_paths(
     "../examples/",
     [
       "a/b/c/d/e/f/logo2.png",
@@ -148,7 +148,7 @@ pub fn files_test() {
     "../examples/a/b/c/d/logo1.png",
   ])
   
-  dt.from_terminals(
+  dt.from_paths(
     "../examples",
     [
       "futuristic/pngs/png1.png",
@@ -174,7 +174,7 @@ pub fn files_test() {
     "../examples/notes/rEADME.md",
   ])
 
-  dt.from_terminals(
+  dt.from_paths(
     "../examples/",
     [
       "futuristic/pngs/png1.png",
@@ -200,7 +200,7 @@ pub fn files_test() {
     "../examples/notes/rEADME.md",
   ])
 
-  dt.from_terminals(
+  dt.from_paths(
     "/",
     [
       "futuristic/pngs/png1.png",
@@ -226,14 +226,14 @@ pub fn files_test() {
     "/notes/rEADME.md",
   ])
 
-  dt.from_terminals(
+  dt.from_paths(
     "/",
     []
   )
   |> dt.files
   |> should.equal([])
 
-  dt.from_terminals(
+  dt.from_paths(
     "../examples",
     []
   )
@@ -242,7 +242,7 @@ pub fn files_test() {
 }
 
 pub fn terminals_test() {
-  dt.from_terminals(
+  dt.from_paths(
     "/",
     [
       "a/b/c/d/e/f/logo2.png",
@@ -257,7 +257,7 @@ pub fn terminals_test() {
     "/empty/",
   ])
 
-  dt.from_terminals(
+  dt.from_paths(
     "../examples/",
     [
       "a/b/c/d/e/f/logo2.png",
@@ -270,7 +270,7 @@ pub fn terminals_test() {
     "../examples/a/b/c/d/logo1.png",
   ])
   
-  dt.from_terminals(
+  dt.from_paths(
     "../examples",
     [
       "futuristic/pngs/png1.png",
@@ -297,7 +297,7 @@ pub fn terminals_test() {
     "../examples/notes/rEADME.md",
   ])
 
-  dt.from_terminals(
+  dt.from_paths(
     "../examples",
     []
   )
@@ -306,7 +306,7 @@ pub fn terminals_test() {
     "../examples/",
   ])
 
-  dt.from_terminals(
+  dt.from_paths(
     "/",
     [
       "futuristic/pngs/png1.png",
@@ -333,7 +333,7 @@ pub fn terminals_test() {
     "/notes/rEADME.md",
   ])
 
-  dt.from_terminals(
+  dt.from_paths(
     "/",
     []
   )
@@ -344,7 +344,7 @@ pub fn terminals_test() {
 }
 
 pub fn from_paths_test() {
-  dt.from_terminals(
+  dt.from_paths(
     "../examples",
     [
       "futuristic/pngs/png1.png",
@@ -362,43 +362,45 @@ pub fn from_paths_test() {
     Dirpath(
       "../examples",
       [
-        Filepath(".DS_Store"),
-        Filepath(".latter"),
-        Dirpath(
-          "empty-directory",
-          [],
-        ),
+        Filepath(".DS_Store", None),
+        Filepath(".latter", None),
+        Dirpath("empty-directory", [], None),
         Dirpath(
           "futuristic",
           [
             Dirpath(
               "pngs",
               [
-                Filepath("png1.png"),
-                Filepath("png2.png"),
+                Filepath("png1.png", None),
+                Filepath("png2.png", None),
               ],
+              None,
             ),
             Dirpath(
               "svgs",
               [
-                Filepath("svg1.png"),
-                Filepath("svg2.png"),
+                Filepath("svg1.png", None),
+                Filepath("svg2.png", None),
               ],
+              None,
             ),
           ],
+          None,
         ),
         Dirpath(
           "notes",
           [
-            Filepath("README.md"),
-            Filepath("old-README.md"),
+            Filepath("README.md", None),
+            Filepath("old-README.md", None),
           ],
+          None,
         ),
       ],
+      None,
     ),
   )
   
-  dt.from_terminals(
+  dt.from_paths(
     "/",
     [
       "futuristic/pngs/png1.png",
@@ -416,45 +418,47 @@ pub fn from_paths_test() {
     Dirpath(
       "/",
       [
-        Filepath(".DS_Store"),
-        Filepath(".latter"),
-        Dirpath(
-          "empty-directory",
-          [],
-        ),
+        Filepath(".DS_Store", None),
+        Filepath(".latter", None),
+        Dirpath("empty-directory", [], None),
         Dirpath(
           "futuristic",
           [
             Dirpath(
               "pngs",
               [
-                Filepath("png1.png"),
-                Filepath("png2.png"),
+                Filepath("png1.png", None),
+                Filepath("png2.png", None),
               ],
+              None,
             ),
             Dirpath(
               "svgs",
               [
-                Filepath("svg1.png"),
-                Filepath("svg2.png"),
+                Filepath("svg1.png", None),
+                Filepath("svg2.png", None),
               ],
+              None,
             ),
           ],
+          None,
         ),
         Dirpath(
           "notes",
           [
-            Filepath("README.md"),
-            Filepath("old-README.md"),
+            Filepath("README.md", None),
+            Filepath("old-README.md", None),
           ],
+          None,
         ),
       ],
+      None,
     ),
   )
 }
 
 pub fn sort_test() {
-  let my_sort = fn(d1: DirTree, d2: DirTree) -> order.Order {
+  let my_sort = fn(d1: DirTree(Nil), d2: DirTree(Nil)) -> order.Order {
     case d1.name, d2.name {
       "." <> _, "." <> _ -> string.compare(d1.name, d2.name)
       "." <> _, _ -> order.Gt
@@ -463,7 +467,7 @@ pub fn sort_test() {
     }
   }
 
-  dt.from_terminals(
+  dt.from_paths(
     "../examples",
     [
       "futuristic/pngs/png1.png",
@@ -482,39 +486,41 @@ pub fn sort_test() {
     Dirpath(
       "../examples",
       [
-        Dirpath(
-          "empty-directory",
-          [],
-        ),
+        Dirpath("empty-directory", [], None),
         Dirpath(
           "futuristic",
           [
             Dirpath(
               "pngs",
               [
-                Filepath("png1.png"),
-                Filepath("png2.png"),
+                Filepath("png1.png", None),
+                Filepath("png2.png", None),
               ],
+              None,
             ),
             Dirpath(
               "svgs",
               [
-                Filepath("svg1.png"),
-                Filepath("svg2.png"),
+                Filepath("svg1.png", None),
+                Filepath("svg2.png", None),
               ],
+              None,
             ),
           ],
+          None,
         ),
         Dirpath(
           "notes",
           [
-            Filepath("README.md"),
-            Filepath("old-README.md"),
+            Filepath("README.md", None),
+            Filepath("old-README.md", None),
           ],
+          None,
         ),
-        Filepath(".DS_Store"),
-        Filepath(".latter"),
+        Filepath(".DS_Store", None),
+        Filepath(".latter", None),
       ],
+      None,
     ),
   )
 }
